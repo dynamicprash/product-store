@@ -19,7 +19,9 @@ const __dirname = path.resolve();
 
 app.use(express.json());//It parses incoming JSON in the body of a request and makes it accessible via req.body.  Without it: req.body will be undefined.
 app.use(cors());//It enables Cross-Origin Resource Sharing — allows your backend to accept requests from other domains (e.g., from your React frontend on localhost:3000 to Express server on localhost:5000).
-app.use(helmet());//middleware to provide security to our app by setting multiple headers
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));//middleware to provide security to our app by setting multiple headers
 app.use(morgan("dev"));//log the request
 
 //apply arcjet rate-limt, bot detection ...  before routings
@@ -57,7 +59,7 @@ app.use("/api/products", productRoutes )  //Defines a route that responds to a G
 if(process.env.NODE_ENV === "production"){
     //serve our react app
     app.use(express.static(path.join(__dirname,"/frontend/dist")))
-    app.get("*", (req,res) => {
+    app.get("/{*splat}", (req,res) => {
         res.sendFile(path.resolve(__dirname,"frontend", "dist", "index.html"));
     })
 }
@@ -78,7 +80,7 @@ async function initDB(){
             )
         `;
         console.log("Database initialized successfully");
-    }catch (error){
+    }catch (error){ 
         console.log("error initializing database",error)
     }
 }
